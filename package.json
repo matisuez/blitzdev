@@ -1,0 +1,22 @@
+{
+  "name": "blitzdev",
+  "version": "1.0.0",
+  "description": "Blitzdev challenge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matisuez/blitzdev.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matisuez/blitzdev/issues"
+  },
+  "homepage": "https://github.com/matisuez/blitzdev#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0"
+  }
+}
