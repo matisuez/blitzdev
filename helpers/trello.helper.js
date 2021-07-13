@@ -6,6 +6,12 @@ const {
     TRELLO_API_TOKEN
 } = process.env;
 
+const {
+    processDiscographyFromTXT
+} = require('./file-handler.helper');
+
+const boardName = "Blitdev - challenge";
+
 async function deleteBoardById(id) {
     try {
         const res = await axios.delete(`https://api.trello.com/1/boards/${id}?key=${TRELLO_API_KEY}&token=${TRELLO_API_TOKEN}`);
@@ -82,11 +88,49 @@ async function getListIdByName(idBoard, listName) {
     
 }
 
+async function createBoardAndList() {
+    
+    const discography = await processDiscographyFromTXT('Sui generis');
+
+    const oldBoardId = await getBoardIdByName(boardName);
+    await deleteBoardById(oldBoardId);
+    await createBoard(boardName);
+    
+    const idBoard = await getBoardIdByName(boardName);
+    
+    for (const d of discography.decades) {
+        await createListForAlbums(idBoard, d.decade);
+    }
+
+}
+
+async function createCards() {
+    
+    const discography = await processDiscographyFromTXT('Sui generis');
+
+    getBoardIdByName(boardName).then( async idBoard => {
+        
+        for (const d of discography.decades) {
+        
+            for (const a of d.albums) {
+                
+                await getListIdByName( idBoard, d.decade).then( async idList => {
+    
+                    await createCardForAlbums(idList, { name: `${a.year} - ${a.album}`, image: 'Image' });    
+    
+                });
+                  
+            }        
+        
+        }
+
+    });
+
+    
+
+}
+
 module.exports = {
-    deleteBoardById,
-    getBoardIdByName,
-    createBoard,
-    createListForAlbums,
-    createCardForAlbums,
-    getListIdByName
+    createBoardAndList,
+    createCards
 }
