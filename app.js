@@ -1,39 +1,127 @@
 
 require('dotenv').config();
 
-const fs = require('fs');
-const readline = require('readline');
-const path = require('path');
+const {
+    processDiscographyFromTXT
+} = require('./helpers/file-handler.helper');
 
 const {
-    TEST
-} = process.env;
+    deleteBoardById,
+    getBoardIdByName,
+    createBoard,
+    createListForAlbums,
+    createCardForAlbums,
+    getListIdByName
+} = require('./helpers/trello.helper');
 
-const discography = [];
+/*
 
-async function processLineByLine() {
-    const filePath = path.join(__dirname, './utils/discography_2.txt');
-    const fileStream = fs.createReadStream(filePath);
+function initProgram() {
+    getBoardIdByName(boardName).then( idBoard => {
+        
+        deleteBoardById(idBoard);
 
-    const rl = readline.createInterface({
-        input: fileStream,
-        crlfDelay: Infinity
+        return idBoard;
+
+    }).then( idBoard => {
+        createBoard(boardName);
     });
-    // Note: we use the crlfDelay option to recognize all instances of CR LF
-    // ('\r\n') in input.txt as a single line break.
+}
 
-    for await (const line of rl) {
-        // Each line in input.txt will be successively available here as `line`.
-        const year = line.trim().split(' ')[0].trim();
-        const album = line.substring(4, line.length).trim();
-        discography.push({ year: parseInt(year), album });
+*/
 
+/*
+
+function scriptOne() {
+
+    getBoardIdByName(boardName).then( idBoard => {
+        
+        processDiscographyFromTXT('Sui generis').then( discography => {
+
+            for (const d of discography.decades) {
+                createListForAlbums(idBoard, d.decade);
+            }
+            
+            return idBoard;
+
+        }).then( idBoard => {
+            scriptTwo(idBoard);
+        });
+
+        
+
+    });
+    
+}
+
+*/
+
+/*
+
+function scriptTwo(idBoard) {
+    processDiscographyFromTXT('Sui generis').then( discography => {
+        for (const d of discography.decades) {
+            getListIdByName(idBoard, d.decade).then( idList => {
+                    
+                    for(const album of discography.decades.find( d => d.decade == d.decade).albums) {
+                        createCardForAlbums(idList, { name: `${album.year} - ${album.album}`, image: 'Image' });
+                    }           
+
+            });
+        }
+
+
+
+    });
+}
+
+*/
+
+const boardName = "Blitdev - challenge";
+
+async function main() {
+    
+    const discography = await processDiscographyFromTXT('Sui generis');
+
+    const oldBoardId = await getBoardIdByName(boardName);
+    await deleteBoardById(oldBoardId);
+    await createBoard(boardName);
+    
+    const idBoard = await getBoardIdByName(boardName);
+    
+    for (const d of discography.decades) {
+        await createListForAlbums(idBoard, d.decade);
     }
-
-    console.log(discography);
 
 }
 
-processLineByLine();
+async function main2() {
+    
+    const discography = await processDiscographyFromTXT('Sui generis');
 
-console.log(TEST);
+    getBoardIdByName(boardName).then( async idBoard => {
+        
+        for (const d of discography.decades) {
+        
+            for (const a of d.albums) {
+                
+                await getListIdByName( idBoard, d.decade).then( async idList => {
+    
+                    await createCardForAlbums(idList, { name: `${a.year} - ${a.album}`, image: 'Image' });    
+    
+                });
+                  
+            }        
+        
+        }
+
+    });
+
+    
+
+}
+
+main().then( () => {
+    main2();
+});
+
